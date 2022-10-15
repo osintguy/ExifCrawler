@@ -1,0 +1,60 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Oct 15 19:36:36 2022
+
+@author: OSINT Guy
+"""
+import re
+import requests
+from bs4 import BeautifulSoup
+from PIL import Image, ExifTags, UnidentifiedImageError
+from urllib.parse import urlparse
+
+'''
+def add_to_url_list(url):
+    #find sitemap
+    #add sitemap to url check list
+    while len(url_check_list) != 0:
+        checking = url_check_list[1]
+        #search for all <a> tags in page 
+        #add them to url check list if not in url complete list and they have the same domain
+        #move checking into url and remove from url check list
+     '''   
+     
+  
+ 
+def download(url):
+    for i in range(len(url)):
+        print(url[i])
+        response = requests.get(url[i])
+        soup = BeautifulSoup(response.text, 'html.parser')
+        image_tags = soup.find_all('img')
+        img_url = [img['src'] for img in image_tags]
+        for src in img_url:
+            filename = re.search(r'/([\w_-]+[.](jpg|gif|png))$', src)
+            if not filename:
+                 continue
+            with open(filename.group(1), 'wb') as f:
+                if 'http' not in src:
+                    hostname = urlparse(url[i]).hostname
+                    scheme = urlparse(url[i]).scheme
+                    src = '{}://{}/{}'.format(scheme, hostname, src)
+                response = requests.get(src)
+                f.write(response.content)
+                try:
+                    global img_content
+                    img_content = Image.open(filename.group(1))
+                    exif = { ExifTags.TAGS[k]: v for k, v in img_content.getexif().items() if k in ExifTags.TAGS }
+                    print(exif)
+                except UnidentifiedImageError:
+                    print(filename.group(1))
+
+        print("Download complete, downloaded images can be found in current directory!")
+        #download image to temp folder
+        #extract metadata, url etc
+        #save to csv file
+        #delete temp file
+  
+url = ['blank']  
+#url[0] = input('Please enter the url you would like to scan (including leading http or https): ')
+download(url)
